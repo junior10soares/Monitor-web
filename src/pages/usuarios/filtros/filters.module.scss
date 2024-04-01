@@ -1,0 +1,10 @@
+@use "../../../global";
+
+.container {
+	width: 100%;
+    display: flex;
+    justify-content: space-between;
+    background-color: white;
+    margin-bottom: 1rem;
+    padding: .4rem 3rem;
+}

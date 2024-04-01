@@ -1,0 +1,16 @@
+@use "../../../global";
+
+.container {
+	display: flex;
+    flex-direction: column;
+	width: 100vw;
+	height: 100vh;
+	background-color: rgba(250, 251, 255, 1);
+
+    .tabHeader{
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        margin: 1rem;
+    }
+}
