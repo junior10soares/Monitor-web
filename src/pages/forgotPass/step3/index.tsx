@@ -1,8 +1,10 @@
 import Button from "@mui/material/Button";
+import { useNavigate } from "react-router-dom";
 import PasswordTextField from "../../../components/passwordTextField";
 import styles from "./forgotPass.module.scss";
 
-function Step3({ setStep }) {
+function Step3() {
+	const navigate = useNavigate();
 	return (
 		<div className={styles.container}>
 			<div className={styles?.["forgot-form-container"]}>
@@ -37,7 +39,7 @@ function Step3({ setStep }) {
 						variant="contained"
 						className={styles?.["forgot-button"]}
 						onClick={() => {
-							setStep(3);
+							navigate("/login");
 						}}
 					>
 						Continuar

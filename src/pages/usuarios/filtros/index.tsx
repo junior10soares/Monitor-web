@@ -18,7 +18,7 @@ function Filters(formik) {
 			<Button
 				type="button"
 				variant="contained"
-				className={styles?.["forgot-button"]}
+				className={styles.buscarButton}
 				onClick={() => {
 					navigate("/users/new");
 				}}

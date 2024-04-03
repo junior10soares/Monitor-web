@@ -3,8 +3,9 @@
 .container {
 	display: flex;
     flex-direction: column;
-	width: 100vw;
+	width: 100%;
 	height: 100vh;
+    height: auto;
 	background-color: rgba(250, 251, 255, 1);
 
     .tabHeader{
@@ -13,4 +14,127 @@
         justify-content: flex-start;
         margin: 1rem;
     }
+
+    .profileForm{
+        width: 80%;
+        height: 80%;
+        border-radius: 15px;
+        padding: 2rem;
+        
+        
+        .profileContainer{
+            background-color: white;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+            justify-content: flex-start;
+            padding: 2rem 4rem;
+            border-radius: 15px;
+
+            & *{
+                margin-bottom: .2rem;
+            }
+
+            .profileImage{
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+                gap: 1rem;
+
+                .inputFileProfile{
+                    background-color: none;
+                }
+            }
+        }
+        .passwordContainer{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+            justify-content: flex-start;
+            background-color: white;
+            padding: 2rem 4rem;
+
+
+            & *{
+                margin-bottom: .2rem;
+            }
+
+            .passInfo{
+                background: rgba(237, 239, 255, 1);
+                padding: 3rem;
+                border-radius: 4px;
+
+                h1{
+                    font-weight: 700;
+                    font-size: 15px;
+                    margin-bottom: 1rem;
+                }
+                ul{
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1rem;
+                    li{
+                        list-style-type: disc;
+                        font-size: 15px;
+                        font-weight: 400;
+                    }
+                }
+
+            }
+        }
+    }
+    .buttonsFooter{
+        display: flex;
+        gap: 1rem;
+        width: 100%;
+        align-items: flex-end;
+        margin-left: 2rem;
+    }
+    .permissionForm{
+        width: 80%;
+        height: 80%;
+        border-radius: 15px;
+        padding: 2rem;
+        
+        
+        .permissionContainer{
+            background-color: white;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+            justify-content: flex-start;
+            padding: 2rem 4rem;
+            border-radius: 15px;
+
+            & *{
+                margin-bottom: .2rem;
+            }
+
+            .permissionsCheckbox{
+                display: flex;
+                flex-direction: row;
+                justify-content: center;
+                gap: 2rem;
+
+                .permissionItem{
+                    border-radius: 15px;
+                    padding: 1rem;
+                    color: white;
+                }
+
+                .permissionItemActive{
+                    border-radius: 15px;
+                    padding: 1rem;
+                    color: white;
+                    background: rgba(63, 128, 255, 1);
+                }
+            }
+           
+        }
+        
+    }
+
 }

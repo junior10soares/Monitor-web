@@ -1,6 +1,7 @@
 import { Box, CircularProgress } from "@mui/material";
 import { useState } from "react";
 import { Outlet } from "react-router-dom";
+import Navbar from "../../components/navbar";
 import Sidebar from "../../components/sidebar";
 import styles from "./rootpage.module.scss";
 
@@ -26,7 +27,10 @@ function Root() {
 				</Box>
 			)}
 			<Sidebar />
-			<Outlet context={[isLoading, setIsLoading]} />
+			<div className={styles.content}>
+				<Navbar />
+				<Outlet context={[isLoading, setIsLoading]} />
+			</div>
 		</div>
 	);
 }
