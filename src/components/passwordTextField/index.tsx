@@ -4,10 +4,10 @@ import TextField from "@mui/material/TextField";
 import { useState } from "react";
 import "./passwordTextField.scss";
 
-function PasswordTextField({ label = "Senha", name = "senha" }) {
+function PasswordTextField({ label = "Senha", name = "senha", col = 12 }) {
 	const [showPass, setShowPass] = useState(false);
 	return (
-		<div className="password-input-container">
+		<div className={`password-input-container col${col}`}>
 			{!showPass ? (
 				<TextField
 					className="password-field"

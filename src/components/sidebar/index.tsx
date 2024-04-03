@@ -41,6 +41,9 @@ export default function Sidebar() {
 						className={`${styles.button} ${
 							location.pathname === "/" ? styles.active : ""
 						}`}
+						onClick={() => {
+							navigate("/");
+						}}
 					>
 						<div className={styles.headerButton}>
 							<HomeIcon className={styles?.buttonIcon} />
@@ -54,6 +57,9 @@ export default function Sidebar() {
 								? styles.active
 								: ""
 						}`}
+						onClick={() => {
+							navigate("/users");
+						}}
 					>
 						<div className={styles.headerButton}>
 							<PersonIcon className={styles?.buttonIcon} />
@@ -67,6 +73,9 @@ export default function Sidebar() {
 								? styles.active
 								: ""
 						}`}
+						onClick={() => {
+							navigate("/turism");
+						}}
 					>
 						<div className={styles.headerButton}>
 							<DirectionsBusFilledIcon

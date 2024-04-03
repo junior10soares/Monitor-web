@@ -199,7 +199,7 @@ function ListUsers() {
 												<EditIcon
 													onClick={() =>
 														navigate(
-															`/beneficiario/edit`,
+															`/users/edit/${row.id}`,
 														)
 													}
 													className={
@@ -208,11 +208,7 @@ function ListUsers() {
 												/>
 
 												<DeleteIcon
-													onClick={() =>
-														navigate(
-															`/beneficiario/view/`,
-														)
-													}
+													onClick={() => {}}
 													className={
 														styles.iconButton
 													}

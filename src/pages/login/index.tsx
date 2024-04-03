@@ -26,7 +26,10 @@ function Login() {
 					/>
 					<PasswordTextField />
 
-					<div className="forgot-pass-div">
+					<div
+						className="forgot-pass-div"
+						onClick={() => navigate("/esqueci-minha-senha")}
+					>
 						<HttpsIcon />
 						<a href="#">Esqueci minha senha</a>
 					</div>
