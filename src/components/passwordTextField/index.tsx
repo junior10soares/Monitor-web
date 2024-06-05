@@ -1,30 +1,43 @@
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import TextField from "@mui/material/TextField";
+import { FormikProps } from "formik";
 import { useState } from "react";
 import "./passwordTextField.scss";
 
-function PasswordTextField({ label = "Senha", name = "senha", col = 12 }) {
+interface FormValues {
+	label: string;
+	formik: FormikProps<{ email: string; password: string }>;
+	col: number;
+}
+
+function PasswordTextField(props: FormValues) {
 	const [showPass, setShowPass] = useState(false);
 	return (
-		<div className={`password-input-container col${col}`}>
+		<div className={`password-input-container col${props.col}`}>
 			{!showPass ? (
 				<TextField
 					className="password-field"
 					id="password"
-					name={name}
-					label={label}
+					name="password"
+					label={props.label}
 					variant="outlined"
 					type="password"
+					value={props.formik.values.password}
+					onChange={props.formik.handleChange}
+					error={!!props.formik.errors.password}
 					required
 				/>
 			) : (
 				<TextField
 					className="password-field"
 					id="password"
-					label={label}
-					name={name}
+					label={props.label}
+					name="password"
 					variant="outlined"
+					value={props.formik.values.password}
+					onChange={props.formik.handleChange}
+					error={!!props.formik.errors.password}
 					required
 				/>
 			)}
