@@ -1,4 +1,3 @@
-import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import FirstPageIcon from "@mui/icons-material/FirstPage";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
@@ -16,8 +15,10 @@ import TableHead from "@mui/material/TableHead";
 import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import { deepPurple } from "@mui/material/colors";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { userType } from "user";
+import { getAllUsers } from "../../../services/user";
 import Filters from "../filtros";
 import styles from "./list.module.scss";
 
@@ -112,24 +113,7 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
 function ListUsers() {
 	const navigate = useNavigate();
 
-	function createData(
-		id: number,
-		image: string,
-		name: string,
-		profile: string,
-	) {
-		return { id, image, name, profile };
-	}
-
-	const rows = [
-		createData(1, "D", "David", "Administrador"),
-		createData(2, "D", "David", "Administrador"),
-		createData(3, "D", "David", "Administrador"),
-		createData(4, "D", "David", "Administrador"),
-		createData(5, "D", "David", "Administrador"),
-		createData(6, "D", "David", "Administrador"),
-		createData(7, "D", "David", "Administrador"),
-	];
+	const [rows, setRows] = useState([]);
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -146,6 +130,16 @@ function ListUsers() {
 		setRowsPerPage(parseInt(event.target.value, 10));
 		setPage(0);
 	};
+
+	useEffect(() => {
+		(async function fetch() {
+			const res = await getAllUsers();
+			if (res.content) {
+				setRows(res.content);
+			}
+		})();
+	}, []);
+
 	return (
 		<>
 			<div className={styles.container}>
@@ -164,7 +158,7 @@ function ListUsers() {
 								<TableRow>
 									<TableCell></TableCell>
 									<TableCell>Nome</TableCell>
-									<TableCell>Perfil</TableCell>
+									<TableCell>Email</TableCell>
 									<TableCell>Ações</TableCell>
 								</TableRow>
 							</TableHead>
@@ -175,7 +169,7 @@ function ListUsers() {
 											page * rowsPerPage + rowsPerPage,
 									  )
 									: rows
-								).map((row) => (
+								).map((row: userType) => (
 									<TableRow
 										key={row.id}
 										sx={{
@@ -189,11 +183,11 @@ function ListUsers() {
 													bgcolor: deepPurple[500],
 												}}
 											>
-												{row.image}
+												{row.name[0]}
 											</Avatar>
 										</TableCell>
 										<TableCell>{row.name}</TableCell>
-										<TableCell>{row.profile}</TableCell>
+										<TableCell>{row.email}</TableCell>
 										<TableCell>
 											<>
 												<EditIcon
@@ -207,12 +201,12 @@ function ListUsers() {
 													}
 												/>
 
-												<DeleteIcon
+												{/* <DeleteIcon
 													onClick={() => {}}
 													className={
 														styles.iconButton
 													}
-												/>
+												/> */}
 											</>
 										</TableCell>
 									</TableRow>

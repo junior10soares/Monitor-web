@@ -7,7 +7,8 @@ import "./passwordTextField.scss";
 
 interface FormValues {
 	label: string;
-	formik: FormikProps<{ email: string; password: string }>;
+	name: string;
+	formik: FormikProps<any>;
 	col: number;
 }
 
@@ -23,9 +24,9 @@ function PasswordTextField(props: FormValues) {
 					label={props.label}
 					variant="outlined"
 					type="password"
-					value={props.formik.values.password}
+					value={props.formik.values[props.name]}
 					onChange={props.formik.handleChange}
-					error={!!props.formik.errors.password}
+					error={!!props.formik.errors[props.name]}
 					required
 				/>
 			) : (
@@ -35,9 +36,9 @@ function PasswordTextField(props: FormValues) {
 					label={props.label}
 					name="password"
 					variant="outlined"
-					value={props.formik.values.password}
+					value={props.formik.values[props.name]}
 					onChange={props.formik.handleChange}
-					error={!!props.formik.errors.password}
+					error={!!props.formik.errors[props.name]}
 					required
 				/>
 			)}

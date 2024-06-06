@@ -15,7 +15,7 @@ function Login() {
 		<Formik
 			initialValues={{ email: "", password: "" }}
 			validate={(_values) => {
-				const errors = {};
+				const errors: any = {};
 				if (!_values.email) {
 					errors.email = "Este campo é obrigatório!";
 				}
@@ -27,6 +27,7 @@ function Login() {
 			onSubmit={async (values) => {
 				const res = await login(values.email, values.password);
 				if (res.token) {
+					localStorage.setItem("token", res.token);
 					navigate("/users");
 				}
 			}}
@@ -53,9 +54,12 @@ function Login() {
 							<PasswordTextField
 								formik={formik}
 								col={12}
-								label="Email"
+								label="Senha"
+								name="password"
 							/>
-							<span className="error">{formik.errors.email}</span>
+							<span className="error">
+								{formik.errors.password}
+							</span>
 							<div
 								className="forgot-pass-div"
 								onClick={() => navigate("/esqueci-minha-senha")}
@@ -69,7 +73,6 @@ function Login() {
 								variant="contained"
 								className="login-button"
 								onClick={() => {
-									console.log("clicou");
 									formik.submitForm();
 								}}
 							>
