@@ -85,7 +85,7 @@ function Form() {
 				return errors;
 			}}
 			onSubmit={async (values: userType) => {
-				var res = {};
+				let res = {};
 				if (values.id) {
 					res = await updateUser(values);
 				} else {
@@ -105,6 +105,8 @@ function Form() {
 						}
 					})();
 				}, []);
+
+				console.log("formik", formik.values)
 
 				return (
 					<div className={styles.container}>
@@ -129,16 +131,16 @@ function Form() {
 						<CustomTabPanel value={value} index={0}>
 							<form className={styles.profileForm}>
 								<div className={styles.profileContainer}>
-									<h1 className="col12">Perfil</h1>
-									<div className={`col2`}>
-										<Avatar
+									<h1 className="col10">Perfil</h1>
+									<div>
+										{/* <Avatar
 											sx={{
 												bgcolor: deepPurple[500],
 											}}
 											className={styles.profileAvatar}
 										>
 											{formik.values.name[0]}
-										</Avatar>
+										</Avatar> */}
 										{/* <Button
 										component="label"
 										role={undefined}
@@ -167,7 +169,8 @@ function Form() {
 										label="CPF"
 										formik={formik}
 										value={formik.values.document}
-										col={4}
+										col={6}
+										maskType="cpf"
 									/>
 									<CustomTextField
 										id="email"
@@ -175,6 +178,7 @@ function Form() {
 										formik={formik}
 										value={formik.values.email}
 										col={12}
+										maskType="email"
 									/>
 									{/* <CustomTextField
 									id="address"
@@ -246,7 +250,7 @@ function Form() {
 									className={styles.primaryButton}
 									sx={{ background: "white", color: "black" }}
 									onClick={() => {
-										navigate("users");
+										navigate("/users");
 									}}
 								>
 									Voltar
