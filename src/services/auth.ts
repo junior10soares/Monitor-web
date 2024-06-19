@@ -1,7 +1,7 @@
 import { axiosInstance } from "./axios";
 
 async function login(email: string, password: string) {
-	const res = await axiosInstance.post("/auth/login", { email, password });
+	const res = await axiosInstance.post("/v1/auth/login", { email, password });
 	return res.data;
 }
 
