@@ -13,7 +13,7 @@ async function saveUser(data: userType) {
 
 async function updateUser(data: userType) {
 	const { id, ...payload } = data;
-	const res = await axiosInstance.post(`/user/${id}`, payload);
+	const res = await axiosInstance.put(`/user/${id}`, payload);
 	return res.data;
 }
 

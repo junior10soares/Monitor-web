@@ -114,6 +114,7 @@ function ListUsers() {
 	const navigate = useNavigate();
 
 	const [rows, setRows] = useState([]);
+	const [filteredRows, setFilteredRows] = useState([]);
 	const [page, setPage] = useState(0);
 	const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -131,11 +132,21 @@ function ListUsers() {
 		setPage(0);
 	};
 
+	const handleFilterUsers = (searchTerm) => {
+		const filteredUsers = rows.filter(
+			(user) =>
+				user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				user.email.toLowerCase().includes(searchTerm.toLowerCase())
+		);
+		setFilteredRows(filteredUsers);
+	};
+
 	useEffect(() => {
 		(async function fetch() {
 			const res = await getAllUsers();
 			if (res.content) {
 				setRows(res.content);
+				setFilteredRows(res.content);
 			}
 		})();
 	}, []);
@@ -143,7 +154,7 @@ function ListUsers() {
 	return (
 		<>
 			<div className={styles.container}>
-				<Filters />
+				<Filters onFilter={handleFilterUsers} />
 
 				<div className={styles.gridContainer}>
 					<h1 className={styles.listHeader}>Listagem de Usuários</h1>
@@ -159,54 +170,32 @@ function ListUsers() {
 									<TableCell></TableCell>
 									<TableCell>Nome</TableCell>
 									<TableCell>Email</TableCell>
+									<TableCell>CPF</TableCell>
 									<TableCell>Ações</TableCell>
 								</TableRow>
 							</TableHead>
 							<TableBody>
 								{(rowsPerPage > 0
-									? rows.slice(
-											page * rowsPerPage,
-											page * rowsPerPage + rowsPerPage,
-									  )
-									: rows
-								).map((row: userType) => (
+									? filteredRows.slice(
+										page * rowsPerPage,
+										page * rowsPerPage + rowsPerPage,
+									)
+									: filteredRows
+								).map((row) => (
 									<TableRow
 										key={row.id}
-										sx={{
-											"&:last-child td, &:last-child th":
-												{ border: 0 },
-										}}
+										sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
 									>
-										<TableCell>
-											<Avatar
-												sx={{
-													bgcolor: deepPurple[500],
-												}}
-											>
-												{row.name[0]}
-											</Avatar>
-										</TableCell>
+										<TableCell></TableCell>
 										<TableCell>{row.name}</TableCell>
 										<TableCell>{row.email}</TableCell>
+										<TableCell>{row.document}</TableCell>
 										<TableCell>
 											<>
 												<EditIcon
-													onClick={() =>
-														navigate(
-															`/users/edit/${row.id}`,
-														)
-													}
-													className={
-														styles.iconButton
-													}
+													onClick={() => navigate(`/users/edit/${row.id}`)}
+													className={styles.iconButton}
 												/>
-
-												{/* <DeleteIcon
-													onClick={() => {}}
-													className={
-														styles.iconButton
-													}
-												/> */}
 											</>
 										</TableCell>
 									</TableRow>

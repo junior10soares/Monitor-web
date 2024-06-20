@@ -1,5 +1,4 @@
 import {
-	Avatar,
 	Box,
 	Button,
 	Checkbox,
@@ -10,15 +9,18 @@ import {
 	Typography,
 	styled,
 } from "@mui/material";
-import { deepPurple } from "@mui/material/colors";
 import { Formik } from "formik";
 import { SyntheticEvent, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { userType } from "user";
 import CustomTextField from "../../../components/customTextField";
 import PasswordTextField from "../../../components/passwordTextField";
 import { buscarPorId, saveUser, updateUser } from "../../../services/user";
 import styles from "./form.module.scss";
+import { recoverPassword } from "../../../services/auth";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { Loading } from "../../../components/Loading";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -58,7 +60,11 @@ const VisuallyHiddenInput = styled("input")({
 function Form() {
 	const [value, setValue] = useState(0);
 	const navigate = useNavigate();
+	const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 	const params = useParams();
+	const location = useLocation();
+	const isEditRoute = location.pathname.includes('/users/edit');
+	const [isLoading, setIsLoading] = useState(false)
 
 	const handleChange = (event: SyntheticEvent, newValue: number) => {
 		setValue(newValue);
@@ -70,6 +76,25 @@ function Form() {
 			"aria-controls": `simple-tabpanel-${index}`,
 		};
 	}
+
+	const handleResetPassword = async (formik, event) => {
+		event.preventDefault();
+
+		try {
+			setIsLoading(true)
+			const email = formik.values.email
+			const recoverResponse = await recoverPassword(email);
+			setIsButtonDisabled(true);
+			toast.success("Seu token foi enviado por email", {
+				position: "top-center"
+			});
+
+		} catch (error) {
+			console.error("Erro ao resetar senha:", error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
 	return (
 		<Formik
@@ -106,10 +131,9 @@ function Form() {
 					})();
 				}, []);
 
-				console.log("formik", formik.values)
-
 				return (
 					<div className={styles.container}>
+						{isLoading && <Loading />}
 						<Box className={styles.tabHeader}>
 							<Tabs
 								value={value}
@@ -210,38 +234,58 @@ function Form() {
 									formik={{}}
 									col={4}
 								/> */}
+									<ToastContainer />
+									{isEditRoute ? (
+										<>
+											<Button
+												type="submit"
+												variant="contained"
+												className={styles.primaryButton}
+												style={{ margin: 'auto' }}
+												disabled={isButtonDisabled}
+												onClick={(event) => handleResetPassword(formik, event)}
+											>
+												Alterar senha
+											</Button>
+										</>
+									) : (
+										<div style={{ display: 'flex', gap: '15px', width: '100%' }}>
+											<PasswordTextField
+												formik={formik}
+												col={12}
+												label="Senha"
+												name="senha"
+											/>
+											<PasswordTextField
+												col={12}
+												formik={formik}
+												label="Repetir Senha"
+												name="repeat-senha"
+											/>
+										</div>
+									)}
 								</div>
-								<div className={styles.passwordContainer}>
-									<PasswordTextField
-										formik={formik}
-										col={12}
-										label="Senha"
-										name="senha"
-									/>
-									<PasswordTextField
-										col={12}
-										formik={formik}
-										label="Repetir Senha"
-										name="repeat-senha"
-									/>
-									<div className={`col12 ${styles.passInfo}`}>
-										<h1>Recomendações:</h1>
-										<ul>
-											<li>
-												Deve conter no mínimo 6
-												caracteres.
-											</li>
-											<li>
-												Proibido caracteres especiais
-												como acento ou ponto e virgula.
-											</li>
-											<li>
-												Mescle a senha com letras e
-												números.
-											</li>
-										</ul>
+								{!isEditRoute && (
+									<div className={styles.passwordContainer}>
+										<div className={`col12 ${styles.passInfo}`}>
+											<h1>Recomendações:</h1>
+											<ul>
+												<li>
+													Deve conter no mínimo 6
+													caracteres.
+												</li>
+												<li>
+													Proibido caracteres especiais
+													como acento ou ponto e virgula.
+												</li>
+												<li>
+													Mescle a senha com letras e
+													números.
+												</li>
+											</ul>
+										</div>
 									</div>
-								</div>
+								)}
 							</form>
 							<div className={styles.buttonsFooter}>
 								<Button
@@ -263,7 +307,7 @@ function Form() {
 										formik.submitForm();
 									}}
 								>
-									Continuar
+									Salvar
 								</Button>
 							</div>
 						</CustomTabPanel>
@@ -283,23 +327,44 @@ function Form() {
 													control={
 														<Checkbox
 															defaultChecked
+															style={{
+																color: 'white',
+															}}
 														/>
 													}
 													label="Criar novo usuário de qualquer perfil"
 												/>
 												<FormControlLabel
 													className={`col12 ${styles.permissionItemActive}`}
-													control={<Checkbox />}
+													control={
+														<Checkbox
+															style={{
+																color: 'white',
+															}}
+														/>
+													}
 													label="Resetar a senha de qualquer usuário"
 												/>
 												<FormControlLabel
 													className={`col12 ${styles.permissionItemActive}`}
-													control={<Checkbox />}
+													control={
+														<Checkbox
+															style={{
+																color: 'white',
+															}}
+														/>
+													}
 													label="Poderá cadastrar notificações do tipo SISTEMA"
 												/>
 												<FormControlLabel
 													className={`col12 ${styles.permissionItemActive}`}
-													control={<Checkbox />}
+													control={
+														<Checkbox
+															style={{
+																color: 'white',
+															}}
+														/>
+													}
 													label="Outro item aqui a ser definido"
 												/>
 											</div>
@@ -309,18 +374,33 @@ function Form() {
 													control={
 														<Checkbox
 															defaultChecked
+															style={{
+																color: 'white',
+															}}
 														/>
 													}
 													label="Desativar o acesso de qualquer usuário"
 												/>
 												<FormControlLabel
 													className={`col12 ${styles.permissionItemActive}`}
-													control={<Checkbox />}
+													control={
+														<Checkbox
+															style={{
+																color: 'white',
+															}}
+														/>
+													}
 													label="NÃO será permitida a deleção de usuários"
 												/>
 												<FormControlLabel
 													className={`col12 ${styles.permissionItemActive}`}
-													control={<Checkbox />}
+													control={
+														<Checkbox
+															style={{
+																color: 'white',
+															}}
+														/>
+													}
 													label="Outro item aqui a ser definido"
 												/>
 											</div>
@@ -351,7 +431,7 @@ function Form() {
 					</div>
 				);
 			}}
-		</Formik>
+		</Formik >
 	);
 }
 
