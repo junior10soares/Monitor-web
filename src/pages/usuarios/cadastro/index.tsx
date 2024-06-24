@@ -1,6 +1,4 @@
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import {
-	Avatar,
 	Box,
 	Button,
 	Checkbox,
@@ -11,11 +9,18 @@ import {
 	Typography,
 	styled,
 } from "@mui/material";
-import { deepPurple } from "@mui/material/colors";
-import { SyntheticEvent, useState } from "react";
+import { Formik } from "formik";
+import { SyntheticEvent, useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { userType } from "user";
 import CustomTextField from "../../../components/customTextField";
 import PasswordTextField from "../../../components/passwordTextField";
+import { buscarPorId, saveUser, updateUser } from "../../../services/user";
 import styles from "./form.module.scss";
+import { recoverPassword } from "../../../services/auth";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { Loading } from "../../../components/Loading";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -54,6 +59,12 @@ const VisuallyHiddenInput = styled("input")({
 
 function Form() {
 	const [value, setValue] = useState(0);
+	const navigate = useNavigate();
+	const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+	const params = useParams();
+	const location = useLocation();
+	const isEditRoute = location.pathname.includes('/users/edit');
+	const [isLoading, setIsLoading] = useState(false)
 
 	const handleChange = (event: SyntheticEvent, newValue: number) => {
 		setValue(newValue);
@@ -66,209 +77,361 @@ function Form() {
 		};
 	}
 
+	const handleResetPassword = async (formik, event) => {
+		event.preventDefault();
+
+		try {
+			setIsLoading(true)
+			const email = formik.values.email
+			const recoverResponse = await recoverPassword(email);
+			setIsButtonDisabled(true);
+			toast.success("Seu token foi enviado por email", {
+				position: "top-center"
+			});
+
+		} catch (error) {
+			console.error("Erro ao resetar senha:", error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
 	return (
-		<div className={styles.container}>
-			<Box className={styles.tabHeader}>
-				<Tabs
-					value={value}
-					onChange={handleChange}
-					aria-label="basic tabs example"
-				>
-					<Tab
-						label="Perfil"
-						{...a11yProps(0)}
-						className={styles.tabButton}
-					/>
-					<Tab
-						label="Permissões"
-						{...a11yProps(1)}
-						className={styles.tabButton}
-					/>
-				</Tabs>
-			</Box>
-			<CustomTabPanel value={value} index={0}>
-				<form className={styles.profileForm}>
-					<div className={styles.profileContainer}>
-						<h1 className="col12">Perfil</h1>
-						<div className={`col4 ${styles.profileImage}`}>
-							<Avatar
-								sx={{
-									bgcolor: deepPurple[500],
-								}}
-								className={styles.profileAvatar}
+		<Formik
+			initialValues={{
+				name: "",
+				email: "",
+				document: "",
+				role: "USER_REGIAO",
+			}}
+			validate={(_values) => {
+				const errors = {};
+
+				return errors;
+			}}
+			onSubmit={async (values: userType) => {
+				let res = {};
+				if (values.id) {
+					res = await updateUser(values);
+				} else {
+					res = await saveUser(values);
+				}
+				if (res.id) {
+					navigate("/users");
+				}
+			}}
+		>
+			{(formik) => {
+				useEffect(() => {
+					(async function fetch() {
+						if (params.id) {
+							const res = await buscarPorId(params.id);
+							formik.setValues(res);
+						}
+					})();
+				}, []);
+
+				return (
+					<div className={styles.container}>
+						{isLoading && <Loading />}
+						<Box className={styles.tabHeader}>
+							<Tabs
+								value={value}
+								onChange={handleChange}
+								aria-label="basic tabs example"
 							>
-								D
-							</Avatar>
-							<Button
-								component="label"
-								role={undefined}
-								variant="contained"
-								tabIndex={-1}
-								startIcon={<CloudUploadIcon />}
-								className={styles.inputFileProfile}
-								sx={{
-									padding: "1rem",
-									paddingInline: "5rem",
-								}}
-							>
-								Upload file
-								<VisuallyHiddenInput type="file" />
-							</Button>
-						</div>
-						<CustomTextField
-							id="name"
-							label="Nome Completo"
-							formik={{}}
-							col={4}
-						/>
-						<CustomTextField
-							id="cpf"
-							label="CPF"
-							formik={{}}
-							col={4}
-						/>
-						<CustomTextField
-							id="email"
-							label="E-mail"
-							formik={{}}
-							col={4}
-						/>
-						<CustomTextField
-							id="address"
-							label="Endereço"
-							formik={{}}
-							col={4}
-						/>
-						<CustomTextField
-							id="municipio"
-							label="Município"
-							formik={{}}
-							col={4}
-						/>
-						<CustomTextField
-							id="phone"
-							label="Celular"
-							formik={{}}
-							col={4}
-						/>
-						<CustomTextField
-							id="profile"
-							label="Perfil do usuário"
-							formik={{}}
-							col={4}
-						/>
-						<CustomTextField
-							id="status"
-							label="Status"
-							formik={{}}
-							col={4}
-						/>
-					</div>
-					<div className={styles.passwordContainer}>
-						<PasswordTextField col={4} />
-						<PasswordTextField col={4} label="Repetir Senha" />
-						<div className={`col12 ${styles.passInfo}`}>
-							<h1>Recomendações:</h1>
-							<ul>
-								<li>Deve conter no mínimo 6 caracteres.</li>
-								<li>
-									Proibido caracteres especiais como acento ou
-									ponto e virgula.
-								</li>
-								<li>Mescle a senha com letras e números.</li>
-							</ul>
-						</div>
-					</div>
-				</form>
-				<div className={styles.buttonsFooter}>
-					<Button
-						type="submit"
-						variant="contained"
-						className={styles.primaryButton}
-						sx={{ background: "white", color: "black" }}
-					>
-						Voltar
-					</Button>
-					<Button
-						type="submit"
-						variant="contained"
-						className={styles.primaryButton}
-						onClick={() => setValue(1)}
-					>
-						Continuar
-					</Button>
-				</div>
-			</CustomTabPanel>
-			<CustomTabPanel value={value} index={1}>
-				<form className={styles.permissionForm}>
-					<div className={styles.permissionContainer}>
-						<h1 className="col12">Permissões</h1>
-						<div>
-							<FormGroup className={styles.permissionsCheckbox}>
-								<div className="col5">
-									<FormControlLabel
-										className={`col12 ${styles.permissionItemActive}`}
-										control={<Checkbox defaultChecked />}
-										label="Criar novo usuário de qualquer perfil"
+								<Tab
+									label="Perfil"
+									{...a11yProps(0)}
+									className={styles.tabButton}
+								/>
+								<Tab
+									label="Permissões"
+									{...a11yProps(1)}
+									className={styles.tabButton}
+								/>
+							</Tabs>
+						</Box>
+						<CustomTabPanel value={value} index={0}>
+							<form className={styles.profileForm}>
+								<div className={styles.profileContainer}>
+									<h1 className="col10">Perfil</h1>
+									<div>
+										{/* <Avatar
+											sx={{
+												bgcolor: deepPurple[500],
+											}}
+											className={styles.profileAvatar}
+										>
+											{formik.values.name[0]}
+										</Avatar> */}
+										{/* <Button
+										component="label"
+										role={undefined}
+										variant="contained"
+										tabIndex={-1}
+										startIcon={<CloudUploadIcon />}
+										className={styles.inputFileProfile}
+										sx={{
+											padding: "1rem",
+											paddingInline: "5rem",
+										}}
+									>
+										Upload file
+										<VisuallyHiddenInput type="file" />
+									</Button> */}
+									</div>
+									<CustomTextField
+										id="name"
+										label="Nome Completo"
+										formik={formik}
+										value={formik.values.name}
+										col={6}
 									/>
-									<FormControlLabel
-										className={`col12 ${styles.permissionItemActive}`}
-										control={<Checkbox />}
-										label="Resetar a senha de qualquer usuário"
+									<CustomTextField
+										id="document"
+										label="CPF"
+										formik={formik}
+										value={formik.values.document}
+										col={6}
+										maskType="cpf"
 									/>
-									<FormControlLabel
-										className={`col12 ${styles.permissionItemActive}`}
-										control={<Checkbox />}
-										label="Poderá cadastrar notificações do tipo SISTEMA"
+									<CustomTextField
+										id="email"
+										label="E-mail"
+										formik={formik}
+										value={formik.values.email}
+										col={12}
+										maskType="email"
 									/>
-									<FormControlLabel
-										className={`col12 ${styles.permissionItemActive}`}
-										control={<Checkbox />}
-										label="Outro item aqui a ser definido"
-									/>
+									{/* <CustomTextField
+									id="address"
+									label="Endereço"
+									formik={{}}
+									col={4}
+								/>
+								<CustomTextField
+									id="municipio"
+									label="Município"
+									formik={{}}
+									col={4}
+								/>
+								<CustomTextField
+									id="phone"
+									label="Celular"
+									formik={{}}
+									col={4}
+								/>
+								<CustomTextField
+									id="profile"
+									label="Perfil do usuário"
+									formik={{}}
+									col={4}
+								/>
+								<CustomTextField
+									id="status"
+									label="Status"
+									formik={{}}
+									col={4}
+								/> */}
+									<ToastContainer />
+									{isEditRoute ? (
+										<>
+											<Button
+												type="submit"
+												variant="contained"
+												className={styles.primaryButton}
+												style={{ margin: 'auto' }}
+												disabled={isButtonDisabled}
+												onClick={(event) => handleResetPassword(formik, event)}
+											>
+												Alterar senha
+											</Button>
+										</>
+									) : (
+										<div style={{ display: 'flex', gap: '15px', width: '100%' }}>
+											<PasswordTextField
+												formik={formik}
+												col={12}
+												label="Senha"
+												name="senha"
+											/>
+											<PasswordTextField
+												col={12}
+												formik={formik}
+												label="Repetir Senha"
+												name="repeat-senha"
+											/>
+										</div>
+									)}
 								</div>
-								<div className="col5">
-									<FormControlLabel
-										className={`col12 ${styles.permissionItemActive}`}
-										control={<Checkbox defaultChecked />}
-										label="Desativar o acesso de qualquer usuário"
-									/>
-									<FormControlLabel
-										className={`col12 ${styles.permissionItemActive}`}
-										control={<Checkbox />}
-										label="NÃO será permitida a deleção de usuários"
-									/>
-									<FormControlLabel
-										className={`col12 ${styles.permissionItemActive}`}
-										control={<Checkbox />}
-										label="Outro item aqui a ser definido"
-									/>
+								{!isEditRoute && (
+									<div className={styles.passwordContainer}>
+										<div className={`col12 ${styles.passInfo}`}>
+											<h1>Recomendações:</h1>
+											<ul>
+												<li>
+													Deve conter no mínimo 6
+													caracteres.
+												</li>
+												<li>
+													Proibido caracteres especiais
+													como acento ou ponto e virgula.
+												</li>
+												<li>
+													Mescle a senha com letras e
+													números.
+												</li>
+											</ul>
+										</div>
+									</div>
+								)}
+							</form>
+							<div className={styles.buttonsFooter}>
+								<Button
+									type="button"
+									variant="contained"
+									className={styles.primaryButton}
+									sx={{ background: "white", color: "black" }}
+									onClick={() => {
+										navigate("/users");
+									}}
+								>
+									Voltar
+								</Button>
+								<Button
+									type="submit"
+									variant="contained"
+									className={styles.primaryButton}
+									onClick={() => {
+										formik.submitForm();
+									}}
+								>
+									Salvar
+								</Button>
+							</div>
+						</CustomTabPanel>
+						<CustomTabPanel value={value} index={1}>
+							<form className={styles.permissionForm}>
+								<div className={styles.permissionContainer}>
+									<h1 className="col12">Permissões</h1>
+									<div>
+										<FormGroup
+											className={
+												styles.permissionsCheckbox
+											}
+										>
+											<div className="col5">
+												<FormControlLabel
+													className={`col12 ${styles.permissionItemActive}`}
+													control={
+														<Checkbox
+															defaultChecked
+															style={{
+																color: 'white',
+															}}
+														/>
+													}
+													label="Criar novo usuário de qualquer perfil"
+												/>
+												<FormControlLabel
+													className={`col12 ${styles.permissionItemActive}`}
+													control={
+														<Checkbox
+															style={{
+																color: 'white',
+															}}
+														/>
+													}
+													label="Resetar a senha de qualquer usuário"
+												/>
+												<FormControlLabel
+													className={`col12 ${styles.permissionItemActive}`}
+													control={
+														<Checkbox
+															style={{
+																color: 'white',
+															}}
+														/>
+													}
+													label="Poderá cadastrar notificações do tipo SISTEMA"
+												/>
+												<FormControlLabel
+													className={`col12 ${styles.permissionItemActive}`}
+													control={
+														<Checkbox
+															style={{
+																color: 'white',
+															}}
+														/>
+													}
+													label="Outro item aqui a ser definido"
+												/>
+											</div>
+											<div className="col5">
+												<FormControlLabel
+													className={`col12 ${styles.permissionItemActive}`}
+													control={
+														<Checkbox
+															defaultChecked
+															style={{
+																color: 'white',
+															}}
+														/>
+													}
+													label="Desativar o acesso de qualquer usuário"
+												/>
+												<FormControlLabel
+													className={`col12 ${styles.permissionItemActive}`}
+													control={
+														<Checkbox
+															style={{
+																color: 'white',
+															}}
+														/>
+													}
+													label="NÃO será permitida a deleção de usuários"
+												/>
+												<FormControlLabel
+													className={`col12 ${styles.permissionItemActive}`}
+													control={
+														<Checkbox
+															style={{
+																color: 'white',
+															}}
+														/>
+													}
+													label="Outro item aqui a ser definido"
+												/>
+											</div>
+										</FormGroup>
+									</div>
 								</div>
-							</FormGroup>
-						</div>
+							</form>
+							<div className={styles.buttonsFooter}>
+								<Button
+									type="submit"
+									variant="contained"
+									className={styles.primaryButton}
+									sx={{ background: "white", color: "black" }}
+									onClick={() => setValue(0)}
+								>
+									Voltar
+								</Button>
+								<Button
+									type="submit"
+									variant="contained"
+									className={styles.primaryButton}
+									onClick={() => setValue(1)}
+								>
+									Salvar
+								</Button>
+							</div>
+						</CustomTabPanel>
 					</div>
-				</form>
-				<div className={styles.buttonsFooter}>
-					<Button
-						type="submit"
-						variant="contained"
-						className={styles.primaryButton}
-						sx={{ background: "white", color: "black" }}
-						onClick={() => setValue(0)}
-					>
-						Voltar
-					</Button>
-					<Button
-						type="submit"
-						variant="contained"
-						className={styles.primaryButton}
-						onClick={() => setValue(1)}
-					>
-						Salvar
-					</Button>
-				</div>
-			</CustomTabPanel>
-		</div>
+				);
+			}}
+		</Formik >
 	);
 }
 

@@ -116,7 +116,7 @@ export default function Sidebar() {
 						<Button
 							onClick={() => {
 								for (let index = 0; index < 5; index++) {
-									localStorage.removeItem(`step${index + 1}`);
+									localStorage.removeItem("token");
 								}
 								navigate("/login");
 								handleClose();

@@ -9,7 +9,7 @@ axiosInstance.interceptors.request.use(
 	(config): InternalAxiosRequestConfig => {
 		if (!config.url?.includes("login")) {
 			config.headers.setAuthorization(
-				`Bearer ${localStorage.getItem("access_token")}`,
+				`Bearer ${localStorage.getItem("token")}`,
 			);
 		}
 
@@ -28,7 +28,7 @@ axiosInstance.interceptors.response.use(
 	async (error): Promise<any> => {
 		console.log(error);
 		if (error.response?.status === 401) {
-			localStorage.removeItem("access_token");
+			localStorage.removeItem("token");
 			window.location.replace("/");
 		}
 		return Promise.reject(error);
