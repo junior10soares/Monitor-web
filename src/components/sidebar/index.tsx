@@ -38,9 +38,8 @@ export default function Sidebar() {
 				/>
 				<div className={styles.buttonsDiv}>
 					<div
-						className={`${styles.button} ${
-							location.pathname === "/" ? styles.active : ""
-						}`}
+						className={`${styles.button} ${location.pathname === "/" ? styles.active : ""
+							}`}
 						onClick={() => {
 							navigate("/");
 						}}
@@ -52,11 +51,10 @@ export default function Sidebar() {
 						<ArrowForwardIosIcon className={styles?.arrowIcon} />
 					</div>
 					<div
-						className={`${styles.button} ${
-							location.pathname.includes("users")
+						className={`${styles.button} ${location.pathname.includes("users")
 								? styles.active
 								: ""
-						}`}
+							}`}
 						onClick={() => {
 							navigate("/users");
 						}}
@@ -68,11 +66,10 @@ export default function Sidebar() {
 						<ArrowForwardIosIcon className={styles?.arrowIcon} />
 					</div>
 					<div
-						className={`${styles.button} ${
-							location.pathname.includes("turismo")
+						className={`${styles.button} ${location.pathname.includes("turismo")
 								? styles.active
 								: ""
-						}`}
+							}`}
 						onClick={() => {
 							navigate("/turism");
 						}}
@@ -108,7 +105,7 @@ export default function Sidebar() {
 					</DialogTitle>
 					<DialogContent>
 						<DialogContentText id="alert-dialog-description">
-							Deseja mesmo sair sem salvar o formulário?
+							Deseja realmente sair?
 						</DialogContentText>
 					</DialogContent>
 					<DialogActions>

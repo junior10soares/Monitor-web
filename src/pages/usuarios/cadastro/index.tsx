@@ -17,10 +17,11 @@ import CustomTextField from "../../../components/customTextField";
 import PasswordTextField from "../../../components/passwordTextField";
 import { buscarPorId, saveUser, updateUser } from "../../../services/user";
 import styles from "./form.module.scss";
-import { recoverPassword } from "../../../services/auth";
+import { getUserMe, recoverPassword } from "../../../services/auth";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Loading } from "../../../components/Loading";
+import CustomTextFieldSelect from "../../../components/custonTextFieldSelect";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -65,6 +66,8 @@ function Form() {
 	const location = useLocation();
 	const isEditRoute = location.pathname.includes('/users/edit');
 	const [isLoading, setIsLoading] = useState(false)
+	const [userMe, setUserMe] = useState()
+	const roles = ["USER_ESTADO", "USER_MUNICIPIO", "USER_REGIAO"]
 
 	const handleChange = (event: SyntheticEvent, newValue: number) => {
 		setValue(newValue);
@@ -96,13 +99,28 @@ function Form() {
 		}
 	};
 
+	useEffect(() => {
+		async function fetchUser() {
+			try {
+				setIsLoading(true);
+				const userData = await getUserMe();
+				setUserMe(userData.role);
+			} catch (error) {
+				console.error('Erro ao carregar usuários:', error);
+			} finally {
+				setIsLoading(false);
+			}
+		}
+		fetchUser();
+	}, []);
+
 	return (
 		<Formik
 			initialValues={{
 				name: "",
 				email: "",
 				document: "",
-				role: "USER_REGIAO",
+				role: "",
 			}}
 			validate={(_values) => {
 				const errors = {};
@@ -110,14 +128,29 @@ function Form() {
 				return errors;
 			}}
 			onSubmit={async (values: userType) => {
-				let res = {};
-				if (values.id) {
-					res = await updateUser(values);
-				} else {
-					res = await saveUser(values);
-				}
-				if (res.id) {
-					navigate("/users");
+				try {
+					setIsLoading(true);
+					let res = {};
+					if (values.id) {
+						res = await updateUser(values.id, values);
+						toast.success('Usuário atualizado com sucesso', {
+							position: 'top-center',
+							autoClose: 1500
+						});
+					} else {
+						res = await saveUser(values);
+						toast.success('Usuário criado com sucesso', {
+							position: 'top-center',
+							autoClose: 1500
+						});
+					}
+					setTimeout(() => {
+						navigate('/users');
+					}, 2000);
+				} catch (error) {
+					console.error('Erro ao submeter formulário:', error);
+				} finally {
+					setIsLoading(false);
 				}
 			}}
 		>
@@ -145,11 +178,11 @@ function Form() {
 									{...a11yProps(0)}
 									className={styles.tabButton}
 								/>
-								<Tab
+								{/* <Tab
 									label="Permissões"
 									{...a11yProps(1)}
 									className={styles.tabButton}
-								/>
+								/> */}
 							</Tabs>
 						</Box>
 						<CustomTabPanel value={value} index={0}>
@@ -204,36 +237,23 @@ function Form() {
 										col={12}
 										maskType="email"
 									/>
-									{/* <CustomTextField
-									id="address"
-									label="Endereço"
-									formik={{}}
-									col={4}
-								/>
-								<CustomTextField
-									id="municipio"
-									label="Município"
-									formik={{}}
-									col={4}
-								/>
-								<CustomTextField
-									id="phone"
-									label="Celular"
-									formik={{}}
-									col={4}
-								/>
-								<CustomTextField
-									id="profile"
-									label="Perfil do usuário"
-									formik={{}}
-									col={4}
-								/>
-								<CustomTextField
-									id="status"
-									label="Status"
-									formik={{}}
-									col={4}
-								/> */}
+									{userMe !== 'USER_REGIAO' && (
+										<CustomTextFieldSelect
+											name="role"
+											id="role"
+											label="Tipo"
+											formik={formik}
+											options={
+												userMe === 'SISADMIN' ? roles
+													: userMe === 'USER_ESTADO' ? ['USER_MUNICIPIO', 'USER_REGIAO']
+														: userMe === 'USER_MUNICIPIO' ? ['USER_REGIAO']
+															: []
+											}
+											col={6}
+											value={formik.values.role}
+											fullWidth
+										/>
+									)}
 									<ToastContainer />
 									{isEditRoute ? (
 										<>
@@ -250,7 +270,7 @@ function Form() {
 										</>
 									) : (
 										<div style={{ display: 'flex', gap: '15px', width: '100%' }}>
-											<PasswordTextField
+											{/* <PasswordTextField
 												formik={formik}
 												col={12}
 												label="Senha"
@@ -261,7 +281,7 @@ function Form() {
 												formik={formik}
 												label="Repetir Senha"
 												name="repeat-senha"
-											/>
+											/> */}
 										</div>
 									)}
 								</div>

@@ -4,6 +4,10 @@ export const axiosInstance = axios.create({
 	baseURL: import.meta.env.VITE_API_URL,
 });
 
+export const axiosBase = axios.create({
+	baseURL: 'http://localhost:8080/api/v1',
+});
+
 // Interceptors
 axiosInstance.interceptors.request.use(
 	(config): InternalAxiosRequestConfig => {
