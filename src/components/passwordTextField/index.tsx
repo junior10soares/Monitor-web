@@ -1,47 +1,43 @@
+import React, { useState } from "react";
 import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import TextField from "@mui/material/TextField";
 import { FormikProps } from "formik";
-import { useState } from "react";
 import "./passwordTextField.scss";
 
-interface FormValues {
+interface PasswordTextFieldProps {
 	label: string;
 	name: string;
-	formik: FormikProps<any>;
+	formik: FormikProps<any>
 	col: number;
 }
 
-function PasswordTextField(props: FormValues) {
+const PasswordTextField: React.FC<PasswordTextFieldProps> = ({
+	label,
+	name,
+	formik,
+	col,
+}) => {
 	const [showPass, setShowPass] = useState(false);
+
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		formik?.handleChange(e);
+	};
+
 	return (
-		<div className={`password-input-container col${props.col}`}>
-			{!showPass ? (
-				<TextField
-					className="password-field"
-					id="password"
-					name="password"
-					label={props.label}
-					variant="outlined"
-					type="password"
-					value={props.formik.values[props.name]}
-					onChange={props.formik.handleChange}
-					error={!!props.formik.errors[props.name]}
-					required
-				/>
-			) : (
-				<TextField
-					className="password-field"
-					id="password"
-					label={props.label}
-					name="password"
-					variant="outlined"
-					value={props.formik.values[props.name]}
-					onChange={props.formik.handleChange}
-					error={!!props.formik.errors[props.name]}
-					required
-				/>
-			)}
+		<div className={`password-input-container col${col}`}>
+			<TextField
+				className="password-field"
+				id={name}
+				name={name}
+				label={label}
+				variant="outlined"
+				type={showPass ? "text" : "password"}
+				value={formik?.values[name]}
+				onChange={handleChange}
+				error={!!formik?.errors[name]}
+				required
+			/>
 
 			<div className="eye-icon-div">
 				{showPass ? (
@@ -62,6 +58,6 @@ function PasswordTextField(props: FormValues) {
 			</div>
 		</div>
 	);
-}
+};
 
 export default PasswordTextField;

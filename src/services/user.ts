@@ -11,9 +11,8 @@ async function saveUser(data: userType) {
 	return res.data;
 }
 
-async function updateUser(data: userType) {
-	const { id, ...payload } = data;
-	const res = await axiosInstance.put(`/user/${id}`, payload);
+async function updateUser(id: number, data: userType) {
+	const res = await axiosInstance.put(`/user/${id}`, data);
 	return res.data;
 }
 
@@ -23,3 +22,13 @@ async function buscarPorId(id: string) {
 }
 
 export { buscarPorId, getAllUsers, saveUser, updateUser };
+
+export async function activeUser(id: number) {
+	const response = await axiosInstance.put(`/user/${id}/activate`, { id });
+	return response.data;
+}
+
+export async function desactiveUser(id: number) {
+	const response = await axiosInstance.put(`/user/${id}/deactivate`, { id });
+	return response.data;
+}

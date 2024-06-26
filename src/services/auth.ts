@@ -16,3 +16,8 @@ export async function recoverPassword(email: string) {
 	const res = await axiosInstance.post("/auth/recover-password", { email });
 	return res.data;
 }
+
+export async function getUserMe() {
+	const res = await axiosInstance.get("/auth/me");
+	return res.data;
+}
