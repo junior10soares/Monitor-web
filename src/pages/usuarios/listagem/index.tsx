@@ -16,11 +16,11 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { activeUser, buscarPorId, desactiveUser, getAllUsers, updateUser } from "../../../services/user";
 import Filters from "../filtros";
 import styles from "./list.module.scss";
 import { Loading } from "../../../components/Loading";
 import { ToastContainer, toast } from "react-toastify";
+import { axiosBase } from "../../../services/axios";
 
 interface TablePaginationActionsProps {
 	count: number;
@@ -143,10 +143,16 @@ function ListUsers() {
 
 	useEffect(() => {
 		(async function fetch() {
-			const res = await getAllUsers();
-			if (res.content) {
-				setRows(res.content);
-				setFilteredRows(res.content);
+			const token = localStorage.getItem("token");
+			const response = await axiosBase.get('/user', {
+				headers: {
+					Authorization: `Bearer ${token}`
+				}
+			});
+
+			if (response.data.content) {
+				setRows(response.data.content);
+				setFilteredRows(response.data.content);
 			}
 		})();
 	}, []);
@@ -154,23 +160,34 @@ function ListUsers() {
 	const handleActiveDesactiveUser = async (id: number, isActive: boolean) => {
 		try {
 			setIsLoading(true);
+
+			const token = localStorage.getItem("token");
+
 			if (!isActive) {
-				await activeUser(id);
+				await axiosBase.put(`/user/${id}/activate`, { id }, {
+					headers: {
+						Authorization: `Bearer ${token}`
+					}
+				});
 				toast.success("Usuário foi ativado", {
 					position: "top-center",
 					autoClose: 1000
 				});
 			} else {
-				await desactiveUser(id);
+				await axiosBase.put(`/user/${id}/deactivate`, { id }, {
+					headers: {
+						Authorization: `Bearer ${token}`
+					}
+				});
 				toast.error("Usuário foi desativado", {
 					position: "top-center",
 					autoClose: 1000
 				});
 			}
 
-			const userData = await buscarPorId(id);
-			const updatedActiveStatus = isActive ? true : false
-			await updateUser(id, { ...userData, active: updatedActiveStatus });
+			// const userData = await buscarPorId(id);
+			// const updatedActiveStatus = isActive ? true : false
+			// await updateUser(id, { ...userData, active: updatedActiveStatus });
 
 			const updatedRows = rows.map(row =>
 				row.id === id ? { ...row, active: !isActive } : row
@@ -238,12 +255,16 @@ function ListUsers() {
 													className={styles.iconButton}
 												/>
 												<div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-													<Switch
-														defaultChecked={row.active}
-														color="success"
-														onClick={() => handleActiveDesactiveUser(row.id, row.active)}
-													/>
-													<span>Ativo</span>
+													{row.role !== 'SISADMIN' && (
+														<>
+															<Switch
+																defaultChecked={row.active}
+																color="success"
+																onClick={() => handleActiveDesactiveUser(row.id, row.active)}
+															/>
+															<span>Ativo</span>
+														</>
+													)}
 												</div>
 											</div>
 										</TableCell>

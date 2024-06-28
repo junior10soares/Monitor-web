@@ -1,4 +1,4 @@
-import { axiosInstance } from "./axios";
+import { axiosBase, axiosInstance } from "./axios";
 
 async function login(email: string, password: string) {
 	const res = await axiosInstance.post("/auth/login", { email, password });
@@ -12,8 +12,8 @@ export async function resetPassword(email: string, password: string, token: stri
 	return res.data;
 }
 
-export async function recoverPassword(email: string) {
-	const res = await axiosInstance.post("/auth/recover-password", { email });
+export async function recoverPassword(email: string, headers: any) {
+	const res = await axiosBase.post("/auth/recover-password", { email, headers });
 	return res.data;
 }
 

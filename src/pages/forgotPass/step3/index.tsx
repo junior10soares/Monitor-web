@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import { Formik, Form } from "formik";
 import PasswordTextField from "../../../components/passwordTextField";
@@ -12,7 +12,7 @@ import { axiosBase } from "../../../services/axios";
 function Step3({ setStep }) {
 	const navigate = useNavigate();
 	const [isLoading, setIsLoading] = useState(false);
-
+	const location = useLocation();
 	const handleChangePassword = async (values, { setErrors }) => {
 
 		try {
@@ -60,11 +60,19 @@ function Step3({ setStep }) {
 			const token = localStorage.getItem("token");
 			const password = values.password;
 
-			await axiosBase.post('/auth/reset-password', {
-				email,
-				token,
-				password
-			});
+			if (location.state && location.state.initialStep === 3) {
+				await axiosBase.put('/user/change-my-password', { password }, {
+					headers: {
+						Authorization: `Bearer ${token}`
+					}
+				});
+			} else {
+				await axiosBase.post('/auth/reset-password', {
+					email,
+					token,
+					password
+				});
+			}
 
 			toast.success('Sua senha foi trocada com sucesso!', {
 				position: 'top-center',
@@ -88,7 +96,11 @@ function Step3({ setStep }) {
 	};
 
 	const handleBackClick = () => {
-		setStep(2);
+		if (location.state && location.state.initialStep === 3) {
+			navigate('/login');
+		} else {
+			setStep(2);
+		}
 	};
 
 	return (
