@@ -17,11 +17,12 @@ import CustomTextField from "../../../components/customTextField";
 import PasswordTextField from "../../../components/passwordTextField";
 import { buscarPorId, saveUser, updateUser } from "../../../services/user";
 import styles from "./form.module.scss";
-import { getUserMe, recoverPassword } from "../../../services/auth";
+import { recoverPassword } from "../../../services/auth";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Loading } from "../../../components/Loading";
 import CustomTextFieldSelect from "../../../components/custonTextFieldSelect";
+import { axiosBase } from "../../../services/axios";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -86,7 +87,11 @@ function Form() {
 		try {
 			setIsLoading(true)
 			const email = formik.values.email
-			const recoverResponse = await recoverPassword(email);
+			const token = localStorage.getItem("token");
+			const headers = {
+				Authorization: `Bearer ${token}`
+			};
+			const recoverResponse = await recoverPassword(email, headers);
 			setIsButtonDisabled(true);
 			toast.success("Seu token foi enviado por email", {
 				position: "top-center"
@@ -103,8 +108,13 @@ function Form() {
 		async function fetchUser() {
 			try {
 				setIsLoading(true);
-				const userData = await getUserMe();
-				setUserMe(userData.role);
+				const token = localStorage.getItem("token");
+				const response = await axiosBase.get('/auth/me', {
+					headers: {
+						Authorization: `Bearer ${token}`
+					}
+				});
+				setUserMe(response.data.role);
 			} catch (error) {
 				console.error('Erro ao carregar usuários:', error);
 			} finally {
@@ -132,13 +142,21 @@ function Form() {
 					setIsLoading(true);
 					let res = {};
 					if (values.id) {
-						res = await updateUser(values.id, values);
+						const token = localStorage.getItem("token");
+						const headers = {
+							Authorization: `Bearer ${token}`
+						};
+						res = await updateUser(values.id, values, headers);
 						toast.success('Usuário atualizado com sucesso', {
 							position: 'top-center',
 							autoClose: 1500
 						});
 					} else {
-						res = await saveUser(values);
+						const token = localStorage.getItem("token");
+						const headers = {
+							Authorization: `Bearer ${token}`
+						};
+						res = await saveUser(values, headers);
 						toast.success('Usuário criado com sucesso', {
 							position: 'top-center',
 							autoClose: 1500
@@ -157,8 +175,12 @@ function Form() {
 			{(formik) => {
 				useEffect(() => {
 					(async function fetch() {
+						const token = localStorage.getItem("token");
+						const headers = {
+							Authorization: `Bearer ${token}`
+						};
 						if (params.id) {
-							const res = await buscarPorId(params.id);
+							const res = await buscarPorId(params.id, headers);
 							formik.setValues(res);
 						}
 					})();

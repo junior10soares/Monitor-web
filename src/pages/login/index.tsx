@@ -18,7 +18,6 @@ function Login() {
 	const handleCheckEmailandLogin = async (values, { setErrors }) => {
 		setIsLoading(true);
 		try {
-
 			const errors = {};
 			if (!values.email) {
 				errors.email = "Este campo é obrigatório!";
@@ -40,7 +39,20 @@ function Login() {
 
 			if (res.data.token) {
 				localStorage.setItem("token", res.data.token);
-				navigate("/users");
+
+				const token = localStorage.getItem("token");
+				const response = await axiosBase.get('/auth/me', {
+					headers: {
+						Authorization: `Bearer ${token}`
+					}
+				});
+				const { initialPassword } = response.data;
+
+				if (initialPassword) {
+					navigate("/esqueci-minha-senha", { state: { initialStep: 3 } });
+				} else {
+					navigate("/users");
+				}
 			} else {
 				toast.error("Senha ou email incorretos", {
 					position: "top-center",
