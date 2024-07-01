@@ -115,7 +115,13 @@ function Step3({ setStep }) {
 					{(formik) => (
 						<Form className={styles?.["forgot-form"]} onSubmit={formik.handleSubmit}>
 							<div className={styles.titleDiv}>
-								<h1 className={styles.title}>Esqueci a senha</h1>
+
+								<h1 className={styles.title}>
+									{location.state && location.state.initialStep === 3
+										? "Defina sua senha"
+										: "Esqueci a senha"}
+								</h1>
+
 								<span className={styles.subtitle}>
 									Escolha uma nova senha que você deseja utilizar para os próximos
 									acessos.

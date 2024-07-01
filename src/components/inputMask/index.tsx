@@ -96,7 +96,7 @@ export default function InputMask({
 					{...rest}
 				/>
 				{!!formik.errors[id] && (
-					<span className={styles.error}>{errors}</span>
+					<span style={{ fontSize: '12px', margin: 0 }} className={styles.error}>{errors}</span>
 				)}
 			</FormControl>
 		</div>

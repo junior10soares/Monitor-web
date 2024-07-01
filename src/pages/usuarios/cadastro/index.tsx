@@ -6,15 +6,13 @@ import {
 	FormGroup,
 	Tab,
 	Tabs,
-	Typography,
-	styled,
+	Typography
 } from "@mui/material";
 import { Formik } from "formik";
 import { SyntheticEvent, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { userType } from "user";
 import CustomTextField from "../../../components/customTextField";
-import PasswordTextField from "../../../components/passwordTextField";
 import { buscarPorId, saveUser, updateUser } from "../../../services/user";
 import styles from "./form.module.scss";
 import { recoverPassword } from "../../../services/auth";
@@ -23,6 +21,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { Loading } from "../../../components/Loading";
 import CustomTextFieldSelect from "../../../components/custonTextFieldSelect";
 import { axiosBase } from "../../../services/axios";
+import InputMask from "../../../components/inputMask";
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -50,14 +49,6 @@ function CustomTabPanel(props: TabPanelProps) {
 	);
 }
 
-const VisuallyHiddenInput = styled("input")({
-	overflow: "hidden",
-	position: "absolute",
-	bottom: 0,
-	left: 0,
-	whiteSpace: "nowrap",
-	width: 0.1,
-});
 
 function Form() {
 	const [value, setValue] = useState(0);
@@ -132,30 +123,43 @@ function Form() {
 				document: "",
 				role: "",
 			}}
-			validate={(_values) => {
+			onSubmit={async (values: userType, { setErrors }) => {
 				const errors = {};
 
-				return errors;
-			}}
-			onSubmit={async (values: userType) => {
+				if (!values.name) {
+					errors.name = "Nome completo é obrigatório";
+				}
+				if (!values.email) {
+					errors.email = "E-mail é obrigatório";
+				}
+				if (!values.document) {
+					errors.document = "CPF/CNPJ é obrigatório";
+				} else if (values.document.replace(/[^0-9]/g, '').length < 11) {
+					errors.document = "CPF/CNPJ deve ter no mínimo 11 caracteres";
+				}
+				if (!values.role) {
+					errors.role = "Tipo é obrigatório";
+				}
+
+				if (Object.keys(errors).length > 0) {
+					setErrors(errors);
+					return;
+				}
+
 				try {
 					setIsLoading(true);
 					let res = {};
+					const token = localStorage.getItem("token");
+					const headers = {
+						Authorization: `Bearer ${token}`
+					};
 					if (values.id) {
-						const token = localStorage.getItem("token");
-						const headers = {
-							Authorization: `Bearer ${token}`
-						};
 						res = await updateUser(values.id, values, headers);
 						toast.success('Usuário atualizado com sucesso', {
 							position: 'top-center',
 							autoClose: 1500
 						});
 					} else {
-						const token = localStorage.getItem("token");
-						const headers = {
-							Authorization: `Bearer ${token}`
-						};
 						res = await saveUser(values, headers);
 						toast.success('Usuário criado com sucesso', {
 							position: 'top-center',
@@ -166,7 +170,11 @@ function Form() {
 						navigate('/users');
 					}, 2000);
 				} catch (error) {
-					console.error('Erro ao submeter formulário:', error);
+					const errorMessage = error.response?.data?.message || 'Erro ao submeter formulário';
+					toast.error(errorMessage, {
+						position: 'top-center',
+						autoClose: 3000
+					});
 				} finally {
 					setIsLoading(false);
 				}
@@ -243,13 +251,19 @@ function Form() {
 										value={formik.values.name}
 										col={6}
 									/>
-									<CustomTextField
+									<InputMask
+										style={{ width: "175px" }}
 										id="document"
-										label="CPF"
+										label="CPF/CNPJ"
 										formik={formik}
-										value={formik.values.document}
 										col={6}
-										maskType="cpf"
+										mascara="000.000.000-00"
+										secondMask="00.000.000/0000-00"
+										definitions={{
+											"#": /[1-9]/,
+										}}
+										value={formik.values.document}
+										onChange={formik.handleChange}
 									/>
 									<CustomTextField
 										id="email"
@@ -307,7 +321,7 @@ function Form() {
 										</div>
 									)}
 								</div>
-								{!isEditRoute && (
+								{/* {!isEditRoute && (
 									<div className={styles.passwordContainer}>
 										<div className={`col12 ${styles.passInfo}`}>
 											<h1>Recomendações:</h1>
@@ -327,7 +341,7 @@ function Form() {
 											</ul>
 										</div>
 									</div>
-								)}
+								)} */}
 							</form>
 							<div className={styles.buttonsFooter}>
 								<Button
