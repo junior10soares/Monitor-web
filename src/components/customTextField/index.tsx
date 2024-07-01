@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { TextField } from "@mui/material";
+import { TextField, FormHelperText } from "@mui/material";
 import InputMask from "react-input-mask";
 import { CustomTextFieldProps } from "customTexteFieldProps";
 import styles from "./customTextField.module.scss";
@@ -69,7 +69,6 @@ export default function CustomTextField({
       required={required}
       variant="outlined"
       className="col12"
-      helperText={formik?.touched?.[id] && formik?.errors?.[id] ? error : emailError || ''}
       onKeyDown={handleKeyDown}
       {...rest}
     />
@@ -91,8 +90,8 @@ export default function CustomTextField({
       ) : (
         renderInput({ value: value ?? formik?.values?.[id], onChange: handleChange })
       )}
-      {!!formik?.errors?.[id] && (
-        <span className={styles.error}>{error}</span>
+      {formik?.touched?.[id] && (formik?.errors?.[id] || emailError) && (
+        <FormHelperText style={{ fontSize: "12px", marginTop: 0 }} error>{formik?.errors?.[id] || emailError}</FormHelperText>
       )}
     </div>
   );

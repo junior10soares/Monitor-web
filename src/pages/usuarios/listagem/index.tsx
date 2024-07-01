@@ -118,6 +118,13 @@ function ListUsers() {
 	const [rowsPerPage, setRowsPerPage] = useState(5);
 	const [isLoading, setIsLoading] = useState(false);
 
+	const UserType = {
+		'USER_ESTADO': 'Estado',
+		'USER_MUNICIPIO': 'Município',
+		'USER_REGIAO': 'Região Turística',
+		'SISADMIN': 'Admin'
+	};
+
 	const handleChangePage = (
 		event: React.MouseEvent<HTMLButtonElement> | null,
 		newPage: number,
@@ -185,10 +192,6 @@ function ListUsers() {
 				});
 			}
 
-			// const userData = await buscarPorId(id);
-			// const updatedActiveStatus = isActive ? true : false
-			// await updateUser(id, { ...userData, active: updatedActiveStatus });
-
 			const updatedRows = rows.map(row =>
 				row.id === id ? { ...row, active: !isActive } : row
 			);
@@ -200,6 +203,10 @@ function ListUsers() {
 		} finally {
 			setIsLoading(false)
 		}
+	};
+
+	const labelDisplayedRows = ({ from, to, count }) => {
+		return `${from}–${to} de ${count !== -1 ? count : `mais de ${to}`}`;
 	};
 
 	return (
@@ -214,97 +221,98 @@ function ListUsers() {
 				<div className={styles.gridContainer}>
 					<h1 className={styles.listHeader}>Listagem de Usuários</h1>
 
-					<TableContainer component={Paper}>
-						<Table
-							sx={{ minWidth: 650 }}
-							size="small"
-							aria-label="a dense table"
-						>
-							<TableHead>
-								<TableRow>
-									<TableCell></TableCell>
-									<TableCell>Nome</TableCell>
-									<TableCell>Email</TableCell>
-									<TableCell>CPF</TableCell>
-									<TableCell align="center">Ações</TableCell>
-								</TableRow>
-							</TableHead>
-							<TableBody>
-								{(rowsPerPage > 0
-									? filteredRows.slice(
-										page * rowsPerPage,
-										page * rowsPerPage + rowsPerPage,
-									)
-									: filteredRows
-								).map((row) => (
-									<TableRow
-										key={row.id}
-										sx={{
-											'&:last-child td, &:last-child th': { border: 0 },
-											opacity: !row.active ? 0.5 : 1
-										}}
-									>
+					{filteredRows.filter(row => row.role !== "SISADMIN").length === 0 ? (
+						<div align="center" style={{ marginTop: "40px" }}>
+							<span>Não existe usuário cadastrados!</span>
+						</div>
+					) : (
+						<TableContainer component={Paper}>
+							<Table
+								sx={{ minWidth: 650 }}
+								size="small"
+								aria-label="a dense table"
+							>
+								<TableHead>
+									<TableRow>
 										<TableCell></TableCell>
-										<TableCell>{row.name}</TableCell>
-										<TableCell>{row.email}</TableCell>
-										<TableCell>{row.document}</TableCell>
-										<TableCell align="center">
-											<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-												<EditIcon
-													onClick={() => navigate(`/users/edit/${row.id}`)}
-													className={styles.iconButton}
-												/>
-												<div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-													{row.role !== 'SISADMIN' && (
-														<>
-															<Switch
-																defaultChecked={row.active}
-																color="success"
-																onClick={() => handleActiveDesactiveUser(row.id, row.active)}
-															/>
-															<span>Ativo</span>
-														</>
-													)}
-												</div>
-											</div>
-										</TableCell>
+										<TableCell>Nome</TableCell>
+										<TableCell>Email</TableCell>
+										<TableCell>CPF</TableCell>
+										<TableCell>Tipo</TableCell>
+										<TableCell align="center">Ações</TableCell>
 									</TableRow>
-								))}
-							</TableBody>
-							<TableFooter>
-								<TableRow>
-									<TablePagination
-										rowsPerPageOptions={[
-											5,
-											10,
-											25,
-											{ label: "Todos", value: -1 },
-										]}
-										colSpan={3}
-										count={rows.length}
-										rowsPerPage={rowsPerPage}
-										page={page}
-										slotProps={{
-											select: {
-												inputProps: {
-													"aria-label":
-														"Linhas por página",
+								</TableHead>
+								<TableBody>
+									{(rowsPerPage > 0
+										? filteredRows.slice(
+											page * rowsPerPage,
+											page * rowsPerPage + rowsPerPage,
+										)
+										: filteredRows
+									).filter(row => row.role !== "SISADMIN").map((row) => (
+										<TableRow
+											key={row.id}
+											sx={{
+												'&:last-child td, &:last-child th': { border: 0 },
+												opacity: !row.active ? 0.5 : 1
+											}}
+										>
+											<TableCell></TableCell>
+											<TableCell>{row.name}</TableCell>
+											<TableCell>{row.email}</TableCell>
+											<TableCell>{row.document}</TableCell>
+											<TableCell>{UserType[row.role]}</TableCell>
+											<TableCell align="center">
+												<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+													<EditIcon
+														onClick={() => navigate(`/users/edit/${row.id}`)}
+														className={styles.iconButton}
+													/>
+													<div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+														<Switch
+															defaultChecked={row.active}
+															color="success"
+															onClick={() => handleActiveDesactiveUser(row.id, row.active)}
+														/>
+														<span>Ativo</span>
+													</div>
+												</div>
+											</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+								<TableFooter>
+									<TableRow>
+										<TablePagination
+											rowsPerPageOptions={[
+												5,
+												10,
+												25,
+												{ label: "Todos", value: -1 },
+											]}
+											colSpan={3}
+											count={rows.length}
+											rowsPerPage={rowsPerPage}
+											page={page}
+											labelDisplayedRows={labelDisplayedRows}
+											labelRowsPerPage="Linhas por página:"
+											slotProps={{
+												select: {
+													inputProps: {
+														"aria-label": "Linhas por página",
+													},
+													native: true,
 												},
-												native: true,
-											},
-										}}
-										onPageChange={handleChangePage}
-										onRowsPerPageChange={
-											handleChangeRowsPerPage
-										}
-										ActionsComponent={
-											TablePaginationActions
-										}
-									/>
-								</TableRow>
-							</TableFooter>
-						</Table>
-					</TableContainer>
+											}}
+											onPageChange={handleChangePage}
+											onRowsPerPageChange={handleChangeRowsPerPage}
+											ActionsComponent={TablePaginationActions}
+										/>
+									</TableRow>
+								</TableFooter>
+							</Table>
+						</TableContainer>
+					)}
 				</div>
 			</div>
 		</>
@@ -312,3 +320,4 @@ function ListUsers() {
 }
 
 export default ListUsers;
+
